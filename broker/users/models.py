@@ -3,12 +3,12 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.models import BaseUserManager
 
-class UserManager(BaseUserManager):
+class UserProfileManager(BaseUserManager):
     '''
     Manager for user 
     '''
 
-    def create_user(self, email, fullname, username, password):
+    def create_user(self, email, username, fullname, password=None):
         ''' 
         Create and save a new user 
         '''
@@ -19,18 +19,18 @@ class UserManager(BaseUserManager):
             raise ValueError('User must enter a username')
 
         email = self.normalize_email(email)
-        user = self.model(fullname=fullname, email=email, username=username)
+        user = self.model(email=email, username=username, fullname=fullname)
         
         user.set_password(password)
         user.save(using=self._db) 
 
         return user
 
-    def create_superuser(self, email, fullname, username, password):
+    def create_superuser(self, email, username, fullname, password):
         '''
         Create and save a new superuser with given details 
         '''
-        user = self.create_user(email, fullname, username, password)
+        user = self.create_user(email, username, fullname, password)
 
         user.is_superuser = True
         user.is_staff = True
@@ -44,14 +44,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     Databases model for users in the system 
     '''
     id = models.AutoField(primary_key=True)
-    fullname = models.CharField(max_length=100)
     email = models.EmailField(max_length=50, unique=True)
-    username = models.CharField(max_length=50, unique=True)
-    # created = models.DateTimeField(auto_now_add=True)
+    username = models.CharField(max_length=50)
+    fullname = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    objects = UserManager()
+    objects = UserProfileManager()
 
     # Replace the username field
     USERNAME_FIELD = 'email'
@@ -67,7 +66,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         ''' Return string representation of our user'''
-        return "{}, ({})".format(self.fullname, self.email)
+        return f'{self.fullname} ({self.email})' 
+        # return "{}, ({})".format(self.fullname, self.email)
         #return self.email
 
 

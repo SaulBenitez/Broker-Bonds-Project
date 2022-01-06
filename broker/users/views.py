@@ -12,11 +12,27 @@ from users import serializers
 from users import models
 
 
+class HelloApiView(APIView):
+    """Test API View"""
+
+    def get(self, request, format=None):
+        """Returns a list of APIView features"""
+
+        an_apiview = [
+            'Uses HTTP methods as functions (get, post, patch, put, delete)',
+            'Is similar to a traditional Django View',
+            'Gives you the most control over your logic',
+            'Is mapped manually to URLs',
+        ]
+
+        return Response({'message': 'Hello!', 'an_apiview': an_apiview})
+
 class UserLoginApiView(ObtainAuthToken):
     ''' 
         Handled creating user authentication tokens 
     '''
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+
 
 class UserViewSet(viewsets.ModelViewSet):
     ''' 
