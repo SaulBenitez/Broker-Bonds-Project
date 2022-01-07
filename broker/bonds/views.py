@@ -1,16 +1,77 @@
 from django.db.models import query
+from django.db.models import Q
+
 from rest_framework.response import Response
 from rest_framework import status
-
 from rest_framework.views import APIView
 from rest_framework import generics
-from rest_framework import viewsets
 
 from bonds.models import Bond
 from bonds.serializers import BondSerializer
 
 
-class BondSellList(generics.ListAPIView):
+class BondUserList(generics.ListAPIView):
+    """ 
+    Retrieve the bought or not sold bonds of the logged user 
+    """
+    queryset = Bond.objects.all()
+    serializer_class = BondSerializer
+
+    def get(self, request):
+        try:
+            user = request.user
+            data = request.data
+            queryset = self.get_queryset().filter(Q(seller=user) | Q(buyer=user)).order_by('id','buyer')
+            serializer = self.serializer_class(queryset, many=True)
+            
+            return Response(serializer.data)
+        except:
+            message = {'message':'The bonds list cannot be displayed'}
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
+class BondSellOrderUserList(generics.ListAPIView):
+    """ 
+    Retrieve the bonds sale orders of the logged user
+    """
+    queryset = Bond.objects.all()
+    serializer_class = BondSerializer
+
+    def get(self, request):
+        try:
+            user = request.user
+            data = request.data
+            queryset = self.get_queryset().exclude(buyer__isnull=False).filter(seller=user)
+            serializer = self.serializer_class(queryset, many=True)
+            
+            return Response(serializer.data)
+        except:
+            message = {'message':'The bonds list cannot be displayed'}
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BondBuyOrderUserList(generics.ListAPIView):
+    """ 
+    Retrieve the bonds buy orders of the logged user
+    """
+    queryset = Bond.objects.all()
+    serializer_class = BondSerializer
+
+    def get(self, request):
+        try:
+            user = request.user
+            queryset = self.get_queryset().exclude(buyer__isnull=True).filter(buyer=user)
+            serializer = self.serializer_class(queryset, many=True)
+            
+            return Response(serializer.data)
+        except:
+            message = {'message':'The bonds list cannot be displayed'}
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BondForSaleList(generics.ListAPIView):
+    """ 
+    Retrieve the bonds sale orders of any user
+    """
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
 
@@ -19,7 +80,7 @@ class BondSellList(generics.ListAPIView):
         try:
             user = request.user
             data = request.data
-            queryset = self.get_queryset()
+            queryset = self.get_queryset().exclude(seller=user).filter(buyer__isnull=True)
             serializer = self.serializer_class(queryset, many=True)
             
             return Response(serializer.data)
@@ -28,21 +89,53 @@ class BondSellList(generics.ListAPIView):
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
        
 
-class BondCreateSellOrder(generics.CreateAPIView):
+class BondCreateSaleOrder(generics.CreateAPIView):
     '''
-    Handle creation of bound sell orders 
+    Create bond sale orders 
     '''
     serializer_class = BondSerializer
 
     def post(self, request):
         user = request.user
         data = request.data
+
         serializer = self.serializer_class(data=data)
-        
         if serializer.is_valid():
             serializer.save(seller=user)
-            message = {'massage':'The sell order has been successfully created'}
+            message = {'massage':'The sale order has been successfully created'}
             return Response(message, status=status.HTTP_201_CREATED)
         
-        message = {'massage':'The sell order has been rejected'}
-        return Response(message.update(serializer.errors), status=status.HTTP_400_BAD_REQUEST)    
+        # message = {'massage':'The sale order has been rejected'}
+        message = serializer.errors
+        return Response(message, status=status.HTTP_400_BAD_REQUEST)    
+
+
+class BondBuyOrder(generics.RetrieveUpdateAPIView):
+    """ 
+    Execute a buy order from bond for sale
+    """
+    serializer_class = BondSerializer
+    queryset = Bond.objects.all()
+
+    def update(self, request, pk):
+        try:
+            user = request.user
+            bond = Bond.objects.get(id=pk)
+        except:
+            message = { 'detail': 'The bond buy order has not been completed' }
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+        
+        if bond.buyer is not None:
+            message = {'detail': 'The bond already has been bought'}
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
+        if bond.seller != user:
+            bond.buyer = user
+            bond.save()
+            message = { 'detail': 'The bond has been bought' }
+            return Response(message, status=status.HTTP_200_OK)
+
+        message = {'detail': 'The user cannot buy its own bonds'}
+        return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
+

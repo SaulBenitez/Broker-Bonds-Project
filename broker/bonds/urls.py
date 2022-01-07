@@ -8,11 +8,12 @@ router = DefaultRouter()
 # router.register('create', views.BondCreateGeneric)
 
 urlpatterns = [
-    # path('sell/', views.UserLoginApiView.as_view()),
-    # path('buy/', views.UserSignUpAPIView.as_view()),
-    # path('create/', views.BondCreateAPIView.as_view()),
-    path('create/', views.BondCreateSellOrder.as_view()),
-    path('list/', views.BondSellList.as_view()),
-    # path('list/usd/', views.UserDetailAPIView.as_view()),
+    path('user/own', views.BondUserList.as_view()),
+    path('user/sale/', views.BondSellOrderUserList.as_view()),
+    path('user/buy/', views.BondBuyOrderUserList.as_view()),
+    path('create/', views.BondCreateSaleOrder.as_view()),
+    path('sale/', views.BondForSaleList.as_view()),
+    path('buy/<int:pk>', views.BondBuyOrder.as_view()),
+    # path('sale/usd/', views.UserDetailAPIView.as_view()),
     path('', include(router.urls))
 ]
