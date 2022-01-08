@@ -7,7 +7,8 @@ from rest_framework.views import APIView
 from rest_framework import generics
 
 from bonds.models import Bond
-from bonds.serializers import BondSerializer
+from bonds.serializers import BondSerializer, BondDollarSerializer, BondDollarListSerializer
+from bonds.services import get_dollar_info
 
 
 class BondUserList(generics.ListAPIView):
@@ -29,7 +30,8 @@ class BondUserList(generics.ListAPIView):
             message = {'message':'The bonds list cannot be displayed'}
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
-class BondSellOrderUserList(generics.ListAPIView):
+
+class BondSaleOrderUserList(generics.ListAPIView):
     """ 
     Retrieve the bonds sale orders of the logged user
     """
@@ -87,6 +89,39 @@ class BondForSaleList(generics.ListAPIView):
         except:
             message = {'message':'The bonds list cannot be displayed'}
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
+# class BondForSaleList(APIView):
+#     """ 
+#     Retrieve the bonds sale orders of any user
+#     """
+
+#     def get(self, request):
+        
+#         bonds = Bond.objects.all()
+#         serializer = BondSerializer(bonds, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class BondForSaleList(generics.ListAPIView):
+    """ 
+    Retrieve the bonds sale orders of any user
+    """
+    queryset = Bond.objects.all()
+    serializer_class = BondSerializer
+
+    def get(self, request):
+        
+        try:
+            user = request.user
+            data = request.data
+            queryset = self.get_queryset().exclude(seller=user).filter(buyer__isnull=True)
+            serializer = self.serializer_class(queryset, many=True)
+            
+            return Response(serializer.data)
+        except:
+            message = {'message':'The bonds list cannot be displayed'}
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
        
 
 class BondCreateSaleOrder(generics.CreateAPIView):
@@ -139,3 +174,58 @@ class BondBuyOrder(generics.RetrieveUpdateAPIView):
         return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
 
+class BondDollarInfo(APIView):
+
+    serializer_class = BondDollarSerializer
+    # queryset = Bond.objects.all()
+
+    def get(self, request):
+        try:
+            data = get_dollar_info()
+            # dollar = float(data['dato'])
+            # print(Bond.objects.all())
+            serializer = BondDollarSerializer({
+                'value': data['dato'],
+                'date': data['fecha']
+            }, many=False)
+
+            return Response(serializer.data)
+        except:
+            message = { 'detail': 'Money conversion could not be done. Try it later' }
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class BondForSaleOrderListUSD(APIView):
+
+#     queryset = Bond.objects.all()
+#     serializer_class = BondDollarListSerializer
+    
+#     def get(self, request):
+#         try:
+#             user = request.user
+#             queryset = self.get_queryset().exclude(seller=user).filter(buyer__isnull=True)
+#             serializer = self.serializer_class(queryset, many=True)
+            
+#             return Response(serializer.data)
+#         except:
+#             message = { 'detail': 'Currency conversion could not be done. Try it later' }
+#             return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
+class BondForSaleOrderListUSD(generics.ListAPIView):
+    """ 
+    Retrieve the bonds sale orders of any user
+    """
+    queryset = Bond.objects.all()
+    serializer_class = BondDollarListSerializer
+
+    def get(self, request):
+        
+        try:
+            user = request.user
+            queryset = self.get_queryset().exclude(seller=user).filter(buyer__isnull=True)
+            serializer = self.serializer_class(queryset, many=True)
+            
+            return Response(serializer.data)
+        except:
+            message = {'message':'The bonds list cannot be displayed'}
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
