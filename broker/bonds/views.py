@@ -7,13 +7,17 @@ from rest_framework.views import APIView
 from rest_framework import generics
 
 from bonds.models import Bond
-from bonds.serializers import BondSerializer, BondDollarSerializer, BondDollarListSerializer
+from bonds.serializers import BondSerializer
+from bonds.serializers import BondDollarSerializer
+from bonds.serializers import DollarSerializer
 from bonds.services import get_dollar_info
+
 
 
 class BondUserList(generics.ListAPIView):
     """ 
     Retrieve the bought or not sold bonds of the logged user 
+    The bond prices are got in national currency (MXN)
     """
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
@@ -34,6 +38,7 @@ class BondUserList(generics.ListAPIView):
 class BondSaleOrderUserList(generics.ListAPIView):
     """ 
     Retrieve the bonds sale orders of the logged user
+    The bond prices are got in national currency (MXN)
     """
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
@@ -54,6 +59,7 @@ class BondSaleOrderUserList(generics.ListAPIView):
 class BondBuyOrderUserList(generics.ListAPIView):
     """ 
     Retrieve the bonds buy orders of the logged user
+    The bond prices are got in national currency (MXN)
     """
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
@@ -73,6 +79,7 @@ class BondBuyOrderUserList(generics.ListAPIView):
 class BondForSaleList(generics.ListAPIView):
     """ 
     Retrieve the bonds sale orders of any user
+    The bond prices are got in national currency (MXN)
     """
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
@@ -90,44 +97,12 @@ class BondForSaleList(generics.ListAPIView):
             message = {'message':'The bonds list cannot be displayed'}
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
-# class BondForSaleList(APIView):
-#     """ 
-#     Retrieve the bonds sale orders of any user
-#     """
-
-#     def get(self, request):
-        
-#         bonds = Bond.objects.all()
-#         serializer = BondSerializer(bonds, many=True)
-#         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class BondForSaleList(generics.ListAPIView):
-    """ 
-    Retrieve the bonds sale orders of any user
-    """
-    queryset = Bond.objects.all()
-    serializer_class = BondSerializer
-
-    def get(self, request):
-        
-        try:
-            user = request.user
-            data = request.data
-            queryset = self.get_queryset().exclude(seller=user).filter(buyer__isnull=True)
-            serializer = self.serializer_class(queryset, many=True)
-            
-            return Response(serializer.data)
-        except:
-            message = {'message':'The bonds list cannot be displayed'}
-            return Response(message, status=status.HTTP_400_BAD_REQUEST)
-
-       
 
 class BondCreateSaleOrder(generics.CreateAPIView):
-    '''
+    """ 
     Create bond sale orders 
-    '''
+    The bond prices are set in national currency (MXN)
+    """
     serializer_class = BondSerializer
 
     def post(self, request):
@@ -174,49 +149,13 @@ class BondBuyOrder(generics.RetrieveUpdateAPIView):
         return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
 
-class BondDollarInfo(APIView):
-
-    serializer_class = BondDollarSerializer
-    # queryset = Bond.objects.all()
-
-    def get(self, request):
-        try:
-            data = get_dollar_info()
-            # dollar = float(data['dato'])
-            # print(Bond.objects.all())
-            serializer = BondDollarSerializer({
-                'value': data['dato'],
-                'date': data['fecha']
-            }, many=False)
-
-            return Response(serializer.data)
-        except:
-            message = { 'detail': 'Money conversion could not be done. Try it later' }
-            return Response(message, status=status.HTTP_400_BAD_REQUEST)
-
-
-# class BondForSaleOrderListUSD(APIView):
-
-#     queryset = Bond.objects.all()
-#     serializer_class = BondDollarListSerializer
-    
-#     def get(self, request):
-#         try:
-#             user = request.user
-#             queryset = self.get_queryset().exclude(seller=user).filter(buyer__isnull=True)
-#             serializer = self.serializer_class(queryset, many=True)
-            
-#             return Response(serializer.data)
-#         except:
-#             message = { 'detail': 'Currency conversion could not be done. Try it later' }
-#             return Response(message, status=status.HTTP_400_BAD_REQUEST)
-
 class BondForSaleOrderListUSD(generics.ListAPIView):
     """ 
-    Retrieve the bonds sale orders of any user
+    Retrieve the bonds sale orders of any user 
+    The bond prices are got in US dollar currency (USD)
     """
     queryset = Bond.objects.all()
-    serializer_class = BondDollarListSerializer
+    serializer_class = BondDollarSerializer
 
     def get(self, request):
         
@@ -228,4 +167,27 @@ class BondForSaleOrderListUSD(generics.ListAPIView):
             return Response(serializer.data)
         except:
             message = {'message':'The bonds list cannot be displayed'}
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
+
+class BondDollarInfo(APIView):
+    """ 
+    Get the value of USD currency
+    """
+    serializer_class = BondDollarSerializer
+    # queryset = Bond.objects.all()
+
+    def get(self, request):
+        try:
+            data = get_dollar_info()
+            # dollar = float(data['dato'])
+            # print(Bond.objects.all())
+            serializer = DollarSerializer({
+                'value': data['dato'],
+                'date': data['fecha']
+            }, many=False)
+
+            return Response(serializer.data)
+        except:
+            message = { 'detail': 'Money conversion could not be done. Try it later' }
             return Response(message, status=status.HTTP_400_BAD_REQUEST)

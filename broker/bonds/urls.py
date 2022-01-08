@@ -8,7 +8,7 @@ router = DefaultRouter()
 # router.register('create', views.BondCreateGeneric)
 
 urlpatterns = [
-    path('user/own', views.BondUserList.as_view()),
+    path('user/own/', views.BondUserList.as_view()),
     path('user/sale/', views.BondSaleOrderUserList.as_view()),
     path('user/buy/', views.BondBuyOrderUserList.as_view()),
     path('create/', views.BondCreateSaleOrder.as_view()),

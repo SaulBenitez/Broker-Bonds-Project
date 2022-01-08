@@ -13,7 +13,7 @@ from users import models
 
 
 class HelloApiView(APIView):
-    """Test API View"""
+    """ Test API View """
 
     def get(self, request, format=None):
         """Returns a list of APIView features"""
@@ -28,16 +28,16 @@ class HelloApiView(APIView):
         return Response({'message': 'Hello!', 'an_apiview': an_apiview})
 
 class UserLoginApiView(ObtainAuthToken):
-    ''' 
-        Handled creating user authentication tokens 
-    '''
+    """  
+        Handle creating user authentication tokens 
+    """
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    ''' 
+    """  
         Handle creating and updating profiles 
-    '''
+    """
     serializer_class = serializers.UserSerializer
     queryset = models.User.objects.all()
     # For permison access
@@ -45,7 +45,9 @@ class UserViewSet(viewsets.ModelViewSet):
     # permission_classes = (permissions.UpdateOwnProfile,)
 
 class UserSignUpAPIView(APIView):
-
+    """  
+        Handle creating profiles 
+    """
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -55,9 +57,9 @@ class UserSignUpAPIView(APIView):
 
 
 class UserDetailAPIView(APIView):
-    '''
-    Handle reading, update, and delete users
-    '''
+    """ 
+    Handle reading, updating, and deleting users
+    """
     def get_object(self, pk):
         try:
             return models.User.objects.get(pk=pk)
