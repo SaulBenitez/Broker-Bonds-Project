@@ -4,7 +4,7 @@ from users import models
 
 
 class UserSerializer(serializers.ModelSerializer):
-    ''' Serializes a user '''
+    """ Serializes a user """
 
     class Meta:
         model = models.User
@@ -21,18 +21,9 @@ class UserSerializer(serializers.ModelSerializer):
                 'style':{'input_type':'password'}
             }
         }
-
-        # extra_kwargs = {
-        #     'password': {
-        #         'write_only': True,
-        #         'style': {'input_type': 'password'}
-        #     },
-        #     'style': {'input_type': 'password'}
-        # }
     
-
     def create(self, validated_data):
-        ''' Create and return a new user'''
+        """ Create and return a new user """
         user = models.User.objects.create_user(
             email = validated_data['email'],
             username = validated_data['username'],
@@ -43,7 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
-        ''' Handle updating user account '''
+        """ Handle updating user account """
         if 'password' in validated_data:
             password = validated_data.pop('password')
             instance.set_password(password)
