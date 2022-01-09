@@ -15,6 +15,7 @@ from users import models
 
 
 class UserLogin(TokenObtainPairView):
+    throttle_scope = 'app_scope_rate'
     serializer_class = UserTokenObtainPairSerializer
 
 
@@ -22,6 +23,7 @@ class UserRegister(generics.CreateAPIView):
     """  
         Handle creating profiles 
     """
+    throttle_scope = 'app_scope_rate'
     serializer_class = UserSerializer
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -34,6 +36,7 @@ class UserList(generics.ListAPIView):
     """  
         Retrive all profiles 
     """
+    throttle_scope = 'app_scope_rate'
     serializer_class = serializers.UserSerializer
     queryset = models.User.objects.all()
     # For permison access
@@ -43,6 +46,7 @@ class UserDetail(APIView):
     """ 
     Handle reading, updating, and deleting individual users
     """
+    throttle_scope = 'app_scope_rate'
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get_object(self, pk):

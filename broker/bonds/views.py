@@ -21,9 +21,10 @@ class BondUserList(generics.ListAPIView):
     Retrieve the bought or not sold bonds of the logged user 
     The bond prices are got in national currency (MXN)
     """
+    throttle_scope = 'app_scope_rate'
+    permission_classes = [IsAuthenticated]
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
-    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
@@ -43,9 +44,10 @@ class BondSaleOrderUserList(generics.ListAPIView):
     Retrieve the bonds sale orders of the logged user
     The bond prices are got in national currency (MXN)
     """
+    throttle_scope = 'app_scope_rate'
+    permission_classes = [IsAuthenticated]
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
-    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
@@ -65,9 +67,10 @@ class BondBuyOrderUserList(generics.ListAPIView):
     Retrieve the bonds buy orders of the logged user
     The bond prices are got in national currency (MXN)
     """
+    throttle_scope = 'app_scope_rate'
+    permission_classes = [IsAuthenticated]
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
-    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
@@ -86,9 +89,10 @@ class BondForSaleList(generics.ListAPIView):
     Retrieve the bonds sale orders of any user
     The bond prices are got in national currency (MXN)
     """
+    throttle_scope = 'app_scope_rate'
+    permission_classes = [IsAuthenticated]
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
-    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         
@@ -109,8 +113,9 @@ class BondCreateSaleOrder(generics.CreateAPIView):
     Create bond sale orders 
     The bond prices are set in national currency (MXN)
     """
-    serializer_class = BondSerializer
+    throttle_scope = 'app_scope_rate'
     permission_classes = [IsAuthenticated]
+    serializer_class = BondSerializer
 
     def post(self, request):
         user = request.user
@@ -131,6 +136,7 @@ class BondBuyOrder(generics.RetrieveUpdateAPIView):
     """ 
     Execute a buy order from bond for sale
     """
+    throttle_scope = 'app_scope_rate'
     serializer_class = BondSerializer
     queryset = Bond.objects.all()
     permission_classes = [IsAuthenticated]
@@ -162,6 +168,7 @@ class BondForSaleOrderListUSD(generics.ListAPIView):
     Retrieve the bonds sale orders of any user 
     The bond prices are got in US dollar currency (USD)
     """
+    throttle_scope = 'app_scope_rate'
     queryset = Bond.objects.all()
     serializer_class = BondDollarSerializer
     permission_classes = [IsAuthenticated]
@@ -183,8 +190,9 @@ class BondDollarInfo(APIView):
     """ 
     Get the value of USD currency
     """
-    serializer_class = BondDollarSerializer
     permission_classes = [IsAuthenticated]
+    throttle_scope = 'app_scope_rate'
+    serializer_class = BondDollarSerializer
     # queryset = Bond.objects.all()
 
     def get(self, request):
