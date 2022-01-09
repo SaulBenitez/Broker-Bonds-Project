@@ -7,57 +7,43 @@ from rest_framework import viewsets
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework import generics
 
 from users.serializers import UserSerializer, UserTokenObtainPairSerializer
 from users import serializers
 from users import models
 
 
-class HelloApiView(APIView):
-    """ Test API View """
-
-    def get(self, request, format=None):
-        """Returns a list of APIView features"""
-
-        an_apiview = [
-            'Uses HTTP methods as functions (get, post, patch, put, delete)',
-            'Is similar to a traditional Django View',
-            'Gives you the most control over your logic',
-            'Is mapped manually to URLs',
-        ]
-
-        return Response({'message': 'Hello!', 'an_apiview': an_apiview})
-
-class UserLoginApiView(TokenObtainPairView):
+class UserLogin(TokenObtainPairView):
     serializer_class = UserTokenObtainPairSerializer
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserRegister(generics.CreateAPIView):
     """  
-        Handle creating and updating profiles 
+        Handle creating profiles 
+    """
+    serializer_class = UserSerializer
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserList(generics.ListAPIView):
+    """  
+        Retrive all profiles 
     """
     serializer_class = serializers.UserSerializer
     queryset = models.User.objects.all()
     # For permison access
     permission_classes = [IsAuthenticated, IsAdminUser]
 
-class UserRegisterAPIView(APIView):
-    """  
-        Handle creating profiles 
-    """
-    def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class UserDetailAPIView(APIView):
+class UserDetail(APIView):
     """ 
-    Handle reading, updating, and deleting users
+    Handle reading, updating, and deleting individual users
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get_object(self, pk):
         try:
