@@ -5,9 +5,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.settings import api_settings
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
-from users.serializers import UserSerializer
+from users.serializers import UserSerializer, UserTokenObtainPairSerializer
 from users import serializers
 from users import models
 
@@ -27,11 +28,8 @@ class HelloApiView(APIView):
 
         return Response({'message': 'Hello!', 'an_apiview': an_apiview})
 
-class UserLoginApiView(ObtainAuthToken):
-    """  
-        Handle creating user authentication tokens 
-    """
-    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+class UserLoginApiView(TokenObtainPairView):
+    serializer_class = UserTokenObtainPairSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -41,10 +39,9 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.UserSerializer
     queryset = models.User.objects.all()
     # For permison access
-    # authentication_classes = (TokenAuthentication,)
-    # permission_classes = (permissions.UpdateOwnProfile,)
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
-class UserSignUpAPIView(APIView):
+class UserRegisterAPIView(APIView):
     """  
         Handle creating profiles 
     """
@@ -60,6 +57,8 @@ class UserDetailAPIView(APIView):
     """ 
     Handle reading, updating, and deleting users
     """
+    permission_classes = [IsAuthenticated]
+
     def get_object(self, pk):
         try:
             return models.User.objects.get(pk=pk)

@@ -1,13 +1,16 @@
 
 from rest_framework import serializers 
-from users import models
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
     """ Serializes a user """
 
     class Meta:
-        model = models.User
+        model = User
         fields = (
             'id',
             'email',
@@ -24,7 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         """ Create and return a new user """
-        user = models.User.objects.create_user(
+        user = User.objects.create_user(
             email = validated_data['email'],
             username = validated_data['username'],
             fullname = validated_data['fullname'],
@@ -40,3 +43,31 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
 
         return super().update(instance, validated_data)
+
+
+class UserSerializerWithToken(UserSerializer):
+    token = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'email',
+            'fullname',
+            'username',
+            'token'
+        ]
+    
+    def get_token(self, obj):
+        token = RefreshToken.for_user(obj)
+        return str(token.access_token)
+
+
+class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
+    
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        serializer = UserSerializerWithToken(self.user).data
+        for k, v in serializer.items():
+            data[k] = v
+        return data

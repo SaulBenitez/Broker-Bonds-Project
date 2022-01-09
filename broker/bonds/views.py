@@ -6,6 +6,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import generics
 
+from rest_framework.permissions import IsAuthenticated
+
 from bonds.models import Bond
 from bonds.serializers import BondSerializer
 from bonds.serializers import BondDollarSerializer
@@ -21,6 +23,7 @@ class BondUserList(generics.ListAPIView):
     """
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
@@ -42,6 +45,7 @@ class BondSaleOrderUserList(generics.ListAPIView):
     """
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
@@ -63,6 +67,7 @@ class BondBuyOrderUserList(generics.ListAPIView):
     """
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
@@ -83,6 +88,7 @@ class BondForSaleList(generics.ListAPIView):
     """
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         
@@ -104,6 +110,7 @@ class BondCreateSaleOrder(generics.CreateAPIView):
     The bond prices are set in national currency (MXN)
     """
     serializer_class = BondSerializer
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         user = request.user
@@ -126,6 +133,7 @@ class BondBuyOrder(generics.RetrieveUpdateAPIView):
     """
     serializer_class = BondSerializer
     queryset = Bond.objects.all()
+    permission_classes = [IsAuthenticated]
 
     def update(self, request, pk):
         try:
@@ -156,6 +164,7 @@ class BondForSaleOrderListUSD(generics.ListAPIView):
     """
     queryset = Bond.objects.all()
     serializer_class = BondDollarSerializer
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         
@@ -175,6 +184,7 @@ class BondDollarInfo(APIView):
     Get the value of USD currency
     """
     serializer_class = BondDollarSerializer
+    permission_classes = [IsAuthenticated]
     # queryset = Bond.objects.all()
 
     def get(self, request):
