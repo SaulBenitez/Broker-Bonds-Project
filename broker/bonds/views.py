@@ -28,8 +28,9 @@ class BondUserList(generics.ListAPIView):
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
 
-    @swagger_auto_schema(responses={200: BondSerializer(many=True)})
+    # @swagger_auto_schema(responses={200: BondSerializer(many=True)})
     def get(self, request):
+        """ List the own user sold bonds """
         try:
             user = request.user
             data = request.data
