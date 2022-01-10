@@ -5,8 +5,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import generics
-
 from rest_framework.permissions import IsAuthenticated
+
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 
 from bonds.models import Bond
 from bonds.serializers import BondSerializer
@@ -26,6 +28,7 @@ class BondUserList(generics.ListAPIView):
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
 
+    @swagger_auto_schema(responses={200: BondSerializer(many=True)})
     def get(self, request):
         try:
             user = request.user
@@ -49,6 +52,7 @@ class BondSaleOrderUserList(generics.ListAPIView):
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
 
+    @swagger_auto_schema(responses={200: BondSerializer(many=True)})
     def get(self, request):
         try:
             user = request.user
@@ -72,6 +76,7 @@ class BondBuyOrderUserList(generics.ListAPIView):
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
 
+    @swagger_auto_schema(responses={200: BondSerializer(many=True)})
     def get(self, request):
         try:
             user = request.user
@@ -94,6 +99,7 @@ class BondForSaleList(generics.ListAPIView):
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
 
+    @swagger_auto_schema(responses={200: BondSerializer(many=True)})
     def get(self, request):
         
         try:
@@ -117,6 +123,7 @@ class BondCreateSaleOrder(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = BondSerializer
 
+    @swagger_auto_schema(responses={200: BondSerializer(many=True)})
     def post(self, request):
         user = request.user
         data = request.data
@@ -141,6 +148,7 @@ class BondBuyOrder(generics.RetrieveUpdateAPIView):
     queryset = Bond.objects.all()
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(responses={200: BondSerializer(many=True)})
     def update(self, request, pk):
         try:
             user = request.user
@@ -173,6 +181,7 @@ class BondForSaleOrderListUSD(generics.ListAPIView):
     serializer_class = BondDollarSerializer
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(responses={200: BondSerializer(many=True)})
     def get(self, request):
         
         try:
@@ -195,6 +204,7 @@ class BondDollarInfo(APIView):
     serializer_class = BondDollarSerializer
     # queryset = Bond.objects.all()
 
+    @swagger_auto_schema(responses={200: BondDollarSerializer(many=True)})
     def get(self, request):
         try:
             data = get_dollar_info()
