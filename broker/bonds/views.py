@@ -12,8 +12,11 @@ from drf_yasg.utils import swagger_auto_schema
 
 from bonds.models import Bond
 from bonds.serializers import BondSerializer
+from bonds.serializers import BondCreateSerializer
+from bonds.serializers import BondBuySerializer
 from bonds.serializers import BondDollarSerializer
 from bonds.serializers import DollarSerializer
+
 from bonds.services import get_dollar_info
 
 
@@ -28,9 +31,9 @@ class BondUserList(generics.ListAPIView):
     queryset = Bond.objects.all()
     serializer_class = BondSerializer
 
-    # @swagger_auto_schema(responses={200: BondSerializer(many=True)})
+    @swagger_auto_schema(responses={200: BondSerializer(many=True)})
     def get(self, request):
-        """ List the own user sold bonds """
+        """ List the bonds that user bought or are for sale """
         try:
             user = request.user
             data = request.data
@@ -117,14 +120,14 @@ class BondForSaleList(generics.ListAPIView):
 
 class BondCreateSaleOrder(generics.CreateAPIView):
     """ 
-    Create bond sale orders 
+    Create bond sell orders 
     The bond prices are set in national currency (MXN)
     """
     throttle_scope = 'app_scope_rate'
     permission_classes = [IsAuthenticated]
     serializer_class = BondSerializer
 
-    @swagger_auto_schema(responses={200: BondSerializer(many=True)})
+    @swagger_auto_schema(responses={200: BondSerializer(many=False)}, request_body=BondCreateSerializer)
     def post(self, request):
         user = request.user
         data = request.data
@@ -149,7 +152,7 @@ class BondBuyOrder(generics.RetrieveUpdateAPIView):
     queryset = Bond.objects.all()
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(responses={200: BondSerializer(many=True)})
+    @swagger_auto_schema(responses={200: BondSerializer(many=False)}, request_body=BondBuySerializer)
     def update(self, request, pk):
         try:
             user = request.user
@@ -170,6 +173,14 @@ class BondBuyOrder(generics.RetrieveUpdateAPIView):
 
         message = {'detail': 'The user cannot buy its own bonds'}
         return Response(message, status=status.HTTP_400_BAD_REQUEST)
+    
+    @swagger_auto_schema(auto_schema=None)
+    def patch(self, request, pk):
+        pass
+
+    @swagger_auto_schema(auto_schema=None)
+    def get(self, request, pk):
+        pass
 
 
 class BondForSaleOrderListUSD(generics.ListAPIView):

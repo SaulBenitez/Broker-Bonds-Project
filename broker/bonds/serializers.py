@@ -23,6 +23,24 @@ class BondSerializer(serializers.ModelSerializer):
         return data
 
 
+class BondCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializes the data to create a bond sell order
+    """
+    class Meta:
+        model = Bond
+        fields = ('bond_name', 'bond_price', 'bond_no')
+
+
+class BondBuySerializer(serializers.ModelSerializer):
+    """
+    Serializes the data to create a bond sell order
+    """
+    class Meta:
+        model = Bond
+        fields = ('id',)
+
+
 class BondDollarSerializer(serializers.ModelSerializer):
     """ Serializes a bond in US currency (USD)  """
     seller = UserSerializer(many=False, read_only=True)
